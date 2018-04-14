@@ -1,0 +1,61 @@
+
+service: aws-nodejs
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: dev
+  region: eu-west-1
+
+iamRoleStatements:
+  - Effect: 'Allow'
+    Action:
+      - '*'
+    Resource:
+      '*'
+  - Effect: "Allow"
+    Action:
+      - "s3:*"
+    Resource: "arn:aws:s3:::s3bucketbiologg/*"
+
+functions:
+  getSightings:
+    handler: sightings.get
+    events:
+      - http:
+          path: sightings
+          method: post
+          cors: true
+  getSpecies:
+    handler: species.get
+    events:
+      - http:
+          path: species
+          method: get
+          cors: true
+  requestUploadURL:
+    handler: image.requestUploadURL
+    events:
+      - http:
+          path: requestUploadURL
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    UploadBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: s3bucketsinistest
+        AccessControl: PublicRead
+        CorsConfiguration:
+          CorsRules:
+          - AllowedMethods:
+            - GET
+            - PUT
+            - POST
+            - HEAD
+            AllowedOrigins:
+            - "*"
+            AllowedHeaders:
+            - "*"
